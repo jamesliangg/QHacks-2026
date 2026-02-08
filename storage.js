@@ -6,7 +6,24 @@ class WishlistStorage {
   }
 
   static async addItem(item) {
+    if (!item || !item.url) {
+      throw new Error('Item must have a valid URL');
+    }
+    
     const items = await this.getAllItems();
+    
+    // Validate and extract domain from URL
+    let domain = item.domain;
+    if (!domain && item.url) {
+      try {
+        domain = new URL(item.url).hostname;
+      } catch (e) {
+        // If URL is invalid, try to extract domain manually or use a fallback
+        const match = item.url.match(/https?:\/\/([^\/]+)/);
+        domain = match ? match[1] : 'unknown';
+      }
+    }
+    
     const newItem = {
       id: Date.now().toString(),
       url: item.url,
@@ -14,7 +31,8 @@ class WishlistStorage {
       price: item.price || null,
       originalPrice: item.price || null,
       priceSelector: item.priceSelector || null,
-      domain: item.domain || new URL(item.url).hostname,
+      watchUuid: item.watchUuid || null, // changedetection.io watch UUID
+      domain: domain,
       addedAt: new Date().toISOString(),
       lastChecked: new Date().toISOString(),
       priceHistory: item.price ? [{ price: item.price, date: new Date().toISOString() }] : []

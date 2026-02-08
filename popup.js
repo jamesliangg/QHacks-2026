@@ -1,9 +1,19 @@
 // Popup script for wishlist management UI
 let currentTab = null;
 let isSelectingPrice = false;
+let changeDetectionAPI = null;
 
 // Initialize popup
 document.addEventListener('DOMContentLoaded', async () => {
+  // Initialize changedetection.io API
+  changeDetectionAPI = new ChangeDetectionAPI();
+  await changeDetectionAPI.initialize();
+  
+  // Check if API is configured, show prompt if not
+  if (!changeDetectionAPI.isConfigured()) {
+    showSettingsPrompt();
+  }
+  
   await loadWishlist();
   await getCurrentTab();
   setupEventListeners();
@@ -28,11 +38,26 @@ function setupEventListeners() {
   document.getElementById('addCurrentPageBtn').addEventListener('click', addCurrentPage);
   document.getElementById('selectPriceBtn').addEventListener('click', startPriceSelection);
   document.getElementById('refreshBtn').addEventListener('click', refreshAllPrices);
+  document.getElementById('settingsBtn').addEventListener('click', openSettings);
+  document.getElementById('closeSettingsBtn').addEventListener('click', closeSettings);
+  document.getElementById('saveSettingsBtn').addEventListener('click', saveSettings);
+  document.getElementById('testConnectionBtn').addEventListener('click', testConnection);
+  
+  // Load existing settings
+  loadSettings();
   
   // Listen for price selection from content script
   chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
     if (request.action === 'priceSelected') {
       handlePriceSelected(request);
+    }
+  });
+  
+  // Close modal when clicking outside
+  const modal = document.getElementById('settingsModal');
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) {
+      closeSettings();
     }
   });
 }
@@ -53,6 +78,18 @@ async function addCurrentPage() {
         title: document.title
       })
     });
+
+    // Validate result
+    if (!result || !result.result) {
+      showStatus('Error: Could not get page information', 'error');
+      return;
+    }
+
+    const pageInfo = result.result;
+    if (!pageInfo.url) {
+      showStatus('Error: Invalid page URL', 'error');
+      return;
+    }
 
     // Try to detect price automatically
     // PriceScraper should already be loaded via content_scripts in manifest
@@ -78,7 +115,7 @@ async function addCurrentPage() {
     });
 
     let priceData = null;
-    if (detectResult.result && detectResult.result.success) {
+    if (detectResult && detectResult.result && detectResult.result.success) {
       priceData = detectResult.result;
     } else {
       // Check if user previously selected a price
@@ -91,11 +128,32 @@ async function addCurrentPage() {
 
     // Add to wishlist
     const item = await WishlistStorage.addItem({
-      url: result.url,
-      title: result.title,
+      url: pageInfo.url,
+      title: pageInfo.title,
       price: priceData ? priceData.price : null,
       priceSelector: priceData ? priceData.selector : null
     });
+
+    // Create watch in changedetection.io if configured
+    if (changeDetectionAPI && changeDetectionAPI.isConfigured()) {
+      try {
+        const watch = await changeDetectionAPI.createWatch(
+          pageInfo.url,
+          pageInfo.title,
+          priceData ? priceData.selector : null
+        );
+        
+        // Store the watch UUID with the item
+        if (watch && watch.uuid) {
+          await WishlistStorage.updateItem(item.id, { watchUuid: watch.uuid });
+        }
+      } catch (error) {
+        console.error('Error creating watch in changedetection.io:', error);
+        showStatus('Added to wishlist, but failed to create watch in changedetection.io', 'error');
+        await loadWishlist();
+        return;
+      }
+    }
 
     showStatus('Product added to wishlist!', 'success');
     await loadWishlist();
@@ -174,6 +232,18 @@ async function loadWishlist() {
   container.querySelectorAll('.btn-delete').forEach(btn => {
     btn.addEventListener('click', async (e) => {
       const id = e.target.closest('.wishlist-item').dataset.id;
+      const item = await WishlistStorage.getItem(id);
+      
+      // Delete watch from changedetection.io if it exists
+      if (item && item.watchUuid && changeDetectionAPI && changeDetectionAPI.isConfigured()) {
+        try {
+          await changeDetectionAPI.deleteWatch(item.watchUuid);
+        } catch (error) {
+          console.error('Error deleting watch:', error);
+          // Continue with deletion even if watch deletion fails
+        }
+      }
+      
       await WishlistStorage.removeItem(id);
       await loadWishlist();
       showStatus('Item removed from wishlist', 'success');
@@ -320,5 +390,92 @@ function escapeHtml(text) {
   const div = document.createElement('div');
   div.textContent = text;
   return div.innerHTML;
+}
+
+// Settings Management
+function showSettingsPrompt() {
+  showStatus('Please configure changedetection.io API in settings', 'info');
+  setTimeout(() => {
+    openSettings();
+  }, 1000);
+}
+
+function openSettings() {
+  const modal = document.getElementById('settingsModal');
+  modal.classList.add('show');
+  loadSettings();
+}
+
+function closeSettings() {
+  const modal = document.getElementById('settingsModal');
+  modal.classList.remove('show');
+  const statusEl = document.getElementById('connectionStatus');
+  statusEl.className = 'connection-status';
+  statusEl.textContent = '';
+}
+
+async function loadSettings() {
+  const config = await chrome.storage.local.get(['changedetectionUrl', 'changedetectionApiKey']);
+  document.getElementById('changedetectionUrl').value = config.changedetectionUrl || 'http://localhost:8888';
+  document.getElementById('changedetectionApiKey').value = config.changedetectionApiKey || '';
+}
+
+async function saveSettings() {
+  const url = document.getElementById('changedetectionUrl').value.trim();
+  const apiKey = document.getElementById('changedetectionApiKey').value.trim();
+  
+  if (!url || !apiKey) {
+    showConnectionStatus('Please fill in both URL and API key', 'error');
+    return;
+  }
+  
+  try {
+    await changeDetectionAPI.configure(url, apiKey);
+    const testResult = await changeDetectionAPI.testConnection();
+    
+    if (testResult.success) {
+      showConnectionStatus('Settings saved and connection successful!', 'success');
+      setTimeout(() => {
+        closeSettings();
+        showStatus('Settings saved successfully', 'success');
+      }, 1500);
+    } else {
+      showConnectionStatus(`Connection failed: ${testResult.error}`, 'error');
+    }
+  } catch (error) {
+    showConnectionStatus(`Error: ${error.message}`, 'error');
+  }
+}
+
+async function testConnection() {
+  const url = document.getElementById('changedetectionUrl').value.trim();
+  const apiKey = document.getElementById('changedetectionApiKey').value.trim();
+  
+  if (!url || !apiKey) {
+    showConnectionStatus('Please fill in both URL and API key', 'error');
+    return;
+  }
+  
+  showConnectionStatus('Testing connection...', 'info');
+  
+  try {
+    await changeDetectionAPI.configure(url, apiKey);
+    const result = await changeDetectionAPI.testConnection();
+    
+    if (result.success) {
+      showConnectionStatus(`Connection successful! Version: ${result.data.version}, Watches: ${result.data.watch_count}`, 'success');
+    } else {
+      showConnectionStatus(`Connection failed: ${result.error}`, 'error');
+    }
+  } catch (error) {
+    showConnectionStatus(`Error: ${error.message}`, 'error');
+  }
+}
+
+function showConnectionStatus(message, type) {
+  const statusEl = document.getElementById('connectionStatus');
+  statusEl.textContent = message;
+  statusEl.className = `connection-status ${type}`;
+  statusEl.style.display = 'block';
 }
 

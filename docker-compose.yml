@@ -1,0 +1,22 @@
+version: '3'
+services:
+  changedetection:
+    image: ghcr.io/dgtlmoon/changedetection.io:latest
+    container_name: changedetection
+    ports:
+      - "8888:5000"
+    volumes:
+      - changedetection-data:/datastore
+    restart: unless-stopped
+    environment:
+      - PLAYWRIGHT_BROWSER_PATH=/usr/bin/chromium
+    # Optional: Add healthcheck
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  changedetection-data:
+
