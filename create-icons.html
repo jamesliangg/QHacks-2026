@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Generate Extension Icons</title>
+</head>
+<body>
+  <h1>Extension Icon Generator</h1>
+  <p>Click on each icon to download it. Save them in the <code>icons/</code> directory.</p>
+  
+  <h2>16x16 Icon <small>(Click to download)</small></h2>
+  <canvas id="icon16" width="16" height="16" style="image-rendering: pixelated;"></canvas>
+  
+  <h2>48x48 Icon <small>(Click to download)</small></h2>
+  <canvas id="icon48" width="48" height="48"></canvas>
+  
+  <h2>128x128 Icon <small>(Click to download)</small></h2>
+  <canvas id="icon128" width="128" height="128"></canvas>
+  
+  <div style="margin-top: 30px; padding: 15px; background: #e3f2fd; border-radius: 8px;">
+    <strong>Instructions:</strong>
+    <ol style="margin: 10px 0; padding-left: 20px;">
+      <li>Click each icon above to download it</li>
+      <li>Save the downloaded files as <code>icon16.png</code>, <code>icon48.png</code>, and <code>icon128.png</code></li>
+      <li>Place them in the <code>icons/</code> directory of your extension</li>
+      <li>Reload the extension in Chrome/Edge</li>
+    </ol>
+  </div>
+  
+  <script>
+    function drawIcon(canvas, size) {
+      const ctx = canvas.getContext('2d');
+      
+      // Background gradient
+      const gradient = ctx.createLinearGradient(0, 0, size, size);
+      gradient.addColorStop(0, '#667eea');
+      gradient.addColorStop(1, '#764ba2');
+      ctx.fillStyle = gradient;
+      ctx.fillRect(0, 0, size, size);
+      
+      // Draw dollar sign
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size * 0.6}px Arial`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('$', size / 2, size / 2);
+    }
+    
+    function downloadIcon(canvas, filename) {
+      canvas.toBlob(function(blob) {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+    }
+    
+    // Draw icons
+    drawIcon(document.getElementById('icon16'), 16);
+    drawIcon(document.getElementById('icon48'), 48);
+    drawIcon(document.getElementById('icon128'), 128);
+    
+    // Add download buttons
+    document.getElementById('icon16').addEventListener('click', () => downloadIcon(document.getElementById('icon16'), 'icon16.png'));
+    document.getElementById('icon48').addEventListener('click', () => downloadIcon(document.getElementById('icon48'), 'icon48.png'));
+    document.getElementById('icon128').addEventListener('click', () => downloadIcon(document.getElementById('icon128'), 'icon128.png'));
+  </script>
+  
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      max-width: 800px;
+      margin: 0 auto;
+    }
+    canvas {
+      border: 1px solid #ccc;
+      margin: 10px 0;
+      cursor: pointer;
+    }
+    h2 {
+      margin-top: 30px;
+    }
+  </style>
+</body>
+</html>
+

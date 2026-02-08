@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wishlist Price Tracker</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>💰 Wishlist Tracker</h1>
+      <button id="refreshBtn" class="btn btn-primary" title="Refresh all prices">
+        🔄 Refresh
+      </button>
+    </header>
+
+    <div class="add-section">
+      <button id="addCurrentPageBtn" class="btn btn-success">
+        ➕ Add Current Page
+      </button>
+      <button id="selectPriceBtn" class="btn btn-secondary" style="display: none;">
+        🎯 Select Price Element
+      </button>
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+
+    <div class="wishlist-container">
+      <h2>Your Wishlist</h2>
+      <div id="wishlistItems" class="wishlist-items">
+        <div class="empty-state">No items in wishlist yet</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="storage.js"></script>
+  <script src="priceScraper.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
+
