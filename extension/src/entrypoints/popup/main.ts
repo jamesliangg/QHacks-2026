@@ -9,11 +9,7 @@ const searchBtn = document.querySelector<HTMLButtonElement>("#searchBtn");
 const openLatestBtn = document.querySelector<HTMLButtonElement>("#openLatest");
 const openGuideBtn = document.querySelector<HTMLButtonElement>("#openGuide");
 const clearRecentBtn = document.querySelector<HTMLButtonElement>("#clearRecent");
-const openExternalBtn = document.querySelector<HTMLButtonElement>("#openExternal");
 const popOutBtn = document.querySelector<HTMLButtonElement>("#popOut");
-const docsFrame = document.querySelector<HTMLIFrameElement>("#docsFrame");
-const viewerEmpty = document.querySelector<HTMLDivElement>("#viewerEmpty");
-const viewerWrap = document.querySelector<HTMLDivElement>(".viewer__frame-wrap");
 const recentList = document.querySelector<HTMLUListElement>("#recentList");
 const emptyState = document.querySelector<HTMLDivElement>("#emptyState");
 
@@ -40,15 +36,10 @@ function openUrl(url: string): void {
   window.open(url, "_blank", "noopener");
 }
 
-function showInViewer(url: string): void {
-  if (!docsFrame || !viewerEmpty || !viewerWrap) return;
-  docsFrame.src = url;
-  viewerEmpty.style.display = "none";
-  viewerWrap.style.display = "block";
-}
-
 function openDocs(url: string): void {
-  showInViewer(url);
+  browser.runtime.sendMessage({ type: "open-doc-window", url }).catch(() => {
+    openUrl(url);
+  });
 }
 
 function normalizeTerm(term: string): string {
@@ -135,20 +126,8 @@ clearRecentBtn?.addEventListener("click", () => {
   renderRecent();
 });
 
-openExternalBtn?.addEventListener("click", () => {
-  const url = docsFrame?.src || ORACLE_JAVA_API;
-  if (url && url !== "about:blank") {
-    openUrl(url);
-  } else {
-    openUrl(ORACLE_JAVA_API);
-  }
-});
-
 popOutBtn?.addEventListener("click", () => {
-  const url = docsFrame?.src || browser.runtime.getURL("viewer.html");
-  browser.runtime.sendMessage({ type: "open-doc-window", url }).catch(() => {
-    openUrl(url);
-  });
+  openDocs(ORACLE_JAVA_API);
 });
 
 renderRecent();
