@@ -39,16 +39,9 @@ For automated price monitoring, set up a local instance of changedetection.io:
    **Note:** Port 8888 is used to avoid conflicts with macOS Control Center on port 5000. You can use any available port (5050, 8080, etc.) if 8888 is already in use.
 
 2. **Or use Docker Compose:**
-   ```yaml
-   version: '3'
-   services:
-     changedetection:
-       image: ghcr.io/dgtlmoon/changedetection.io:latest
-       ports:
-         - "5000:5000"
-       volumes:
-         - datastore-volume:/datastore
-   ```
+    Located in this repository (`docker-compose.yml`).
+    Run using `docker-compuse up -d`
+    To stop, run `docker-compose down`
 
 3. **Access changedetection.io:**
    - Open `http://localhost:8888` in your browser
