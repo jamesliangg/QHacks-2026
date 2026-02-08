@@ -121,6 +121,50 @@ p {
   flex-wrap: wrap;
 }
 
+.viewer {
+  background: var(--panel);
+  border-radius: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  display: grid;
+  gap: 10px;
+}
+
+.viewer__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.viewer__header h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.viewer__frame-wrap {
+  width: 100%;
+  min-height: 240px;
+  height: 320px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #0f172a;
+  display: none;
+  resize: both;
+  overflow: auto;
+}
+
+.viewer__frame {
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #0f172a;
+}
+
+.viewer__empty {
+  color: var(--muted);
+  font-size: 12px;
+}
+
 .results {
   background: var(--panel);
   border-radius: 12px;

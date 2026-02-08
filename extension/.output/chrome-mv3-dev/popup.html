@@ -6,7 +6,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Java Docs Search</title>
-    <link rel="stylesheet" href="http://localhost:3000/src/entrypoints/popup/style.css">  <script type="module" crossorigin="" src="/chunks/popup-D9IQCBBx.js"></script>
+    <link rel="stylesheet" href="http://localhost:3000/src/entrypoints/popup/style.css">  <script type="module" crossorigin="" src="/chunks/reload-html-D9IQCBBx.js"></script>
 </head>
   <body>
     <main class="app">
@@ -29,6 +29,18 @@
         <div class="search__actions">
           <button id="openLatest" type="button" class="ghost">Open Java 21 API</button>
           <button id="openGuide" type="button" class="ghost">Java SE Docs</button>
+        </div>
+      </section>
+
+      <section class="viewer">
+        <div class="viewer__header">
+          <h2>Documentation</h2>
+          <button id="openExternal" type="button" class="ghost">Open in new tab</button>
+          <button id="popOut" type="button" class="ghost">Pop out window</button>
+        </div>
+        <div id="viewerEmpty" class="viewer__empty">Search to load docs here.</div>
+        <div class="viewer__frame-wrap">
+          <iframe id="docsFrame" title="Oracle Java Documentation" class="viewer__frame" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
         </div>
       </section>
 

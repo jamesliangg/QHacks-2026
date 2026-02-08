@@ -1,0 +1,91 @@
+:root {
+  color-scheme: light dark;
+  font-family: "Inter", "Segoe UI", system-ui, sans-serif;
+  --bg: #0b1020;
+  --panel: #111827;
+  --accent: #3b82f6;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --border: rgba(148, 163, 184, 0.2);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+}
+
+.viewer-app {
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: 100vh;
+}
+
+.viewer-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--panel);
+}
+
+.viewer-header h1 {
+  margin: 0;
+  font-size: 20px;
+}
+
+.viewer-header p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.viewer-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewer-actions input {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: #0f172a;
+  color: var(--text);
+  min-width: 220px;
+}
+
+.viewer-actions button {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: var(--accent);
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.viewer-actions .ghost {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.viewer-frame {
+  height: 100%;
+}
+
+.viewer-frame iframe {
+  width: 100%;
+  height: calc(100vh - 80px);
+  border: none;
+  background: #0f172a;
+}

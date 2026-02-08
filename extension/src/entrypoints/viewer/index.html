@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Java Oracle Docs Viewer</title>
+    <link rel="stylesheet" href="./style.css" />
+  </head>
+  <body>
+    <main class="viewer-app">
+      <header class="viewer-header">
+        <div>
+          <h1>Java Oracle Docs</h1>
+          <p>Resizable documentation viewer</p>
+        </div>
+        <div class="viewer-actions">
+          <input id="viewerQuery" type="text" placeholder="Search Java API" />
+          <button id="viewerSearch">Search</button>
+          <button id="viewerOpenApi" class="ghost">Java 21 API</button>
+        </div>
+      </header>
+      <section class="viewer-frame">
+        <iframe id="viewerFrame" title="Oracle Java Documentation" sandbox="allow-scripts allow-same-origin allow-forms"></iframe>
+      </section>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

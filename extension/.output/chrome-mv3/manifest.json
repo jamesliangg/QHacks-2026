@@ -1,1 +1,1 @@
-{"manifest_version":3,"name":"Java Oracle Docs Search","description":"Quickly search and open Java Oracle documentation.","version":"0.1.0","action":{"default_title":"Java Docs Search","default_popup":"popup.html"}}
+{"manifest_version":3,"name":"Java Oracle Docs Search","description":"Quickly search and open Java Oracle documentation.","version":"0.1.0","content_security_policy":{"extension_pages":"script-src 'self'; object-src 'self'; frame-src https://docs.oracle.com"},"action":{"default_title":"Java Docs Search","default_popup":"popup.html"}}

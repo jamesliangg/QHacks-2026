@@ -9,6 +9,11 @@ const searchBtn = document.querySelector<HTMLButtonElement>("#searchBtn");
 const openLatestBtn = document.querySelector<HTMLButtonElement>("#openLatest");
 const openGuideBtn = document.querySelector<HTMLButtonElement>("#openGuide");
 const clearRecentBtn = document.querySelector<HTMLButtonElement>("#clearRecent");
+const openExternalBtn = document.querySelector<HTMLButtonElement>("#openExternal");
+const popOutBtn = document.querySelector<HTMLButtonElement>("#popOut");
+const docsFrame = document.querySelector<HTMLIFrameElement>("#docsFrame");
+const viewerEmpty = document.querySelector<HTMLDivElement>("#viewerEmpty");
+const viewerWrap = document.querySelector<HTMLDivElement>(".viewer__frame-wrap");
 const recentList = document.querySelector<HTMLUListElement>("#recentList");
 const emptyState = document.querySelector<HTMLDivElement>("#emptyState");
 
@@ -33,6 +38,17 @@ function openUrl(url: string): void {
   }
 
   window.open(url, "_blank", "noopener");
+}
+
+function showInViewer(url: string): void {
+  if (!docsFrame || !viewerEmpty || !viewerWrap) return;
+  docsFrame.src = url;
+  viewerEmpty.style.display = "none";
+  viewerWrap.style.display = "block";
+}
+
+function openDocs(url: string): void {
+  showInViewer(url);
 }
 
 function normalizeTerm(term: string): string {
@@ -80,7 +96,7 @@ function renderRecent(): void {
     text.type = "button";
     text.className = "results__button";
     text.textContent = item.term;
-    text.addEventListener("click", () => openUrl(item.url));
+    text.addEventListener("click", () => openDocs(item.url));
 
     const time = document.createElement("span");
     time.className = "results__time";
@@ -101,7 +117,7 @@ function handleSearch(): void {
 
   const url = buildSearchUrl(term);
   addRecent(term, url);
-  openUrl(url);
+  openDocs(url);
 }
 
 queryInput?.addEventListener("keydown", (event) => {
@@ -112,11 +128,27 @@ queryInput?.addEventListener("keydown", (event) => {
 
 searchBtn?.addEventListener("click", handleSearch);
 
-openLatestBtn?.addEventListener("click", () => openUrl(ORACLE_JAVA_API));
-openGuideBtn?.addEventListener("click", () => openUrl(JAVA_SE_DOCS));
+openLatestBtn?.addEventListener("click", () => openDocs(ORACLE_JAVA_API));
+openGuideBtn?.addEventListener("click", () => openDocs(JAVA_SE_DOCS));
 clearRecentBtn?.addEventListener("click", () => {
   localStorage.removeItem(RECENT_KEY);
   renderRecent();
+});
+
+openExternalBtn?.addEventListener("click", () => {
+  const url = docsFrame?.src || ORACLE_JAVA_API;
+  if (url && url !== "about:blank") {
+    openUrl(url);
+  } else {
+    openUrl(ORACLE_JAVA_API);
+  }
+});
+
+popOutBtn?.addEventListener("click", () => {
+  const url = docsFrame?.src || browser.runtime.getURL("viewer.html");
+  browser.runtime.sendMessage({ type: "open-doc-window", url }).catch(() => {
+    openUrl(url);
+  });
 });
 
 renderRecent();
